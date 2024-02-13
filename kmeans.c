@@ -5,28 +5,37 @@
 int DEBUG = 0;
 
 //distance between 2 points
-float dist(float *p, float *q, int d){
-    float sumofsquares = 0;
-    if(DEBUG) printf("error here 1\n");
+double dist(double *p, double *q, int d){
+    printf("welcome to dist!\n");
+    double sumofsquares = 0;
     
     for(int i = 0 ; i < d ; ++i){
-        if(DEBUG) printf("asd\n");
-        float bruh = *p;
-        if(DEBUG) printf("%f\n", bruh);
-        sumofsquares += pow(p[i]-q[i], 2);
+        printf("%lf ",*(p+i));
     }
+    printf("\n");
+    for(int i = 0 ; i < d ; ++i){
+        printf("%lf ",*(q+i));
+    }
+    printf("\n");
+
+    for(int i = 0 ; i < d ; ++i){
+        sumofsquares += pow(*(p+i)-*(q+i), 2);
+    }
+    printf("\n");
     return sqrt(sumofsquares);
 }
 
 //assign to xi the cluster. returns the index.
-int clusterSelection(float *x, float *mu, int K, int d){
-    if(DEBUG) printf("error here 2\n");
-    float minDist = dist(x, mu, d);//the first mu
-    if(DEBUG) printf("17\n");
+int clusterSelection(double *x, double *mu, int K, int d){
+    printf("welcome to clusterSelction for x=:");
+    for(int i = 0 ; i < d; i++) printf("%lf ",*(x+i));
+    printf("\n");
+    double minDist = dist(x, mu, d);//the first mu
+    printf("min dist: %lf\n", minDist);
     int index = 0;
     for(int i = 1; i < K ; ++i){
-        if(DEBUG) printf("error here 3\n");
-        float tmp=dist(x, mu+d, d);
+        double tmp=dist(x, mu+(i*d), d);
+        printf("%lf\n", tmp);
         if(tmp < minDist) {
             minDist = tmp;
             index = i;
@@ -36,68 +45,95 @@ int clusterSelection(float *x, float *mu, int K, int d){
 }
 
 //assign to all x the clusters
-void assign(float *mu, float *DB, int *association, int d, int K, int n){
+void assign(double *mu, double *DB, int *association, int d, int K, int n){
     for(int i = 0 ; i < n ; i++){
-        if(DEBUG) printf("error here 4\n");
-        association[i] = clusterSelection(DB+(i*d),mu,K,d);//the ith point.
+        printf("%d\n", clusterSelection(DB+(i*d),mu,K,d));
+        *(association+i) = clusterSelection(DB+(i*d),mu,K,d);//the ith point.
     }
 }
 
 //update mu and returns if the delta condition is violated
-// 0 - keep going
-// 1 - stop:
-int updateMu(float *mu, float *DB, int *association, int d, int K, int n){
-    if(DEBUG) printf("error here 5");
+// 1 - keep going
+// 0 - stop:
+int updateMu(double *mu, double *DB, int *association, int d, int K, int n){
+    printf("updating...\n");
+    printf("association:\n");
+    for(int i = 0 ; i < n ; i++) printf("%d, ", association[i]);
+    printf("\n");
     int clusterSize[K];//stores sizes of clusters.
-    float muTmp[K][d];//stores the acccumelated positions.
+    double muTmp[K][d];//stores the acccumelated positions.
+    for(int i = 0 ; i < K*d ; i++) *((double *)muTmp+i) = 0;// initiate muTmp to zeros.
     for(int i = 0 ; i < K ; i++) clusterSize[i]=0;
     for(int i = 0 ; i < n; ++i){
         clusterSize[association[i]]++;
-        for(int j = 0;j<d;j++) muTmp[association[i]][j] += DB[i+d*j];
+        for(int j = 0;j<d;j++) muTmp[association[i]][j] += DB[i*d+j];
     }
     for(int i = 0 ; i < K ; i++){
-        for(int j = 0;j<d;j++) muTmp[i][j] /= clusterSize[i];
+        for(int j = 0 ; j < d ; j++){
+            muTmp[i][j] /= clusterSize[i];
+            printf("%lf ", muTmp[i][j]);
+        }
+        printf("----\n");
     }
+
+    int result = 0;
     for(int i = 0 ; i < K ; i++){
+        printf("%lf, %lf, %lf\n", *(mu+i*d), *(mu+1+i*d), *(mu+2+i*d));
         //If even 1 of the centroids is far we keep going.
-        if(dist(mu+(i*d),muTmp[i],d)>=0.001) return 0;
+        if(dist(mu+(i*d),muTmp[i],d)>=0.001){
+            result = 1;
+        }
     }
     for(int i = 0 ; i < K ; i++){
         for(int j = 0 ; j < d ; j++){
             *(mu+(i*d+j)) = muTmp[i][j];
         }
     }
-    return 1;
+    
+    return result;
 }
 
 //kmeans
-void kmeans(float *DB, int d, int K, int n, int iter){ 
+void kmeans(double *DB, int d, int K, int n, int iter){ 
     //initiate mu:
-    if(DEBUG) printf("error here 6\n");
-    float mu[K][d];
+    double mu[K][d];
     for(int i = 0; i < K; ++i){
         for(int j = 0; j < d; ++j){
-            //printf("error here 7\n");
-            mu[i][j] = DB[i+d*j];
-            //printf("huh?1");
-            //printf("%d %d\n", i, j);
+            mu[i][j] = DB[i*d+j];
         }
-        if(DEBUG) printf("huh?\n");
     }
-    if(DEBUG) printf("gj\n");
     
     int association[n];
     int count = 0;
+    int deltaCondition;
+
     do{
-        assign((float *)mu, DB, association, d, K, n);
-    }while(!updateMu((float *)mu, DB, (int *) association, d, K, n) && (++count)<iter);
-    if(DEBUG) printf("82\n");
+        assign((double *)mu, DB, association, d, K, n);
+        printf("BRUH:\n");
+        for(int i = 0 ; i < n ; i++) printf("%d, ", association[i]);
+        printf("\n");
+        deltaCondition = updateMu((double *)mu, DB, (int *) association, d, K, n);
+        printf("%d, %d\n", deltaCondition, count);
+    }while(deltaCondition && (++count)<iter);
+    
+    printf("\n\n\n\n%d\n", count);
+
     for(int i = 0 ; i < K ; i++){
         for(int j = 0 ; j < d-1 ; j++){
-            printf("%.4f, ", mu[i][j]);
+            printf("%.4f,", mu[i][j]);
         }
         printf("%.4f\n", mu[i][d-1]);
     }
+
+    //prints to a file named curout.txt as well:
+    FILE *fp = fopen("curout.txt", "w");
+    for(int i = 0 ; i < K ; i++){
+        for(int j = 0 ; j < d-1 ; j++){
+            fprintf(fp, "%.4f,", mu[i][j]);
+        }
+        fprintf(fp, "%.4f\n", mu[i][d-1]);
+    }
+    fclose(fp);
 
 
 }
@@ -138,20 +174,14 @@ int main(int argc, char **argv){
     int iter = (int)iter_tmp;
     //inputting the points
     char trash;
-    float points[n][d];
+    double points[n][d];
     for(int i = 0 ; i < n ; i++){
         for (int j = 0; j < d-1; ++j) {                
-            scanf("%f", &points[i][j]);
+            scanf("%lf", &points[i][j]);
             scanf("%c", &trash);
-            //printf("%d %d",j ,d);
-            //scanf("%s,", &tmp_str);
-            //points[i][j] = strtod(tmp_str, &nothing);
         }
-        scanf("%f\n", &points[i][d-1]);
-        //printf("%d\n",i);
+        scanf("%lf\n", &points[i][d-1]);
     }
-    if(DEBUG) printf("error here 7\n");
-    kmeans((float *)points, d, K, n, iter);
-    if(DEBUG) printf("error here 8\n");
+    kmeans((double *)points, d, K, n, iter);
     return 0;
 }
