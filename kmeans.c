@@ -42,6 +42,7 @@ int updateMu(double *mu, double *DB, int *association, int d, int K, int n){
     int *clusterSize = (int *)malloc(K*sizeof(int));/*stores sizes of clusters.*/
     double *muTmp = (double *)malloc(K*d*sizeof(double));/*stores the acccumelated positions.*/
     int i,j;
+    int result = 0;
     for(i = 0 ; i < K*d ; i++) *((double *)muTmp+i) = 0;/* initiate muTmp to zeros.*/
     for(i = 0 ; i < K ; i++) clusterSize[i]=0;
     for(i = 0 ; i < n; ++i){
@@ -54,7 +55,6 @@ int updateMu(double *mu, double *DB, int *association, int d, int K, int n){
         }
     }
 
-    int result = 0;
     for(i = 0 ; i < K ; i++){
         /*If even 1 of the centroids is far we keep going.*/
         if(dist(mu+(i*d),(muTmp+i*d),d)>=0.001){
@@ -73,17 +73,17 @@ int updateMu(double *mu, double *DB, int *association, int d, int K, int n){
 /*kmeans*/
 void kmeans(double *DB, int d, int K, int n, int iter){ 
     /*initiate mu:*/
-    double *mu = (double *)malloc(K*d*sizeof(double));
+    int count = 0;
+    int deltaCondition;
     int i,j;
+    double *mu = (double *)malloc(K*d*sizeof(double));
+    int *association = (int *)malloc(n*sizeof(int));;
+    
     for(i = 0; i < K; ++i){
         for(j = 0; j < d; ++j){
             mu[i*d+j] = DB[i*d+j];
         }
     }
-    
-    int association[n];
-    int count = 0;
-    int deltaCondition;
 
     do{
         assign((double *)mu, DB, association, d, K, n);
@@ -101,20 +101,31 @@ void kmeans(double *DB, int d, int K, int n, int iter){
 
 int main(int argc, char **argv){
     /*inputting the terminal arguments*/
-    double K_tmp, n_tmp, d_tmp, iter_tmp;
     char *nothing;
+    char trash;
     int i,j;
-    K_tmp = strtod(argv[1], &nothing);
-    n_tmp = strtod(argv[2], &nothing);
-    d_tmp = strtod(argv[3], &nothing);
+    double K_tmp = strtod(argv[1], &nothing);
+    double n_tmp = strtod(argv[2], &nothing);
+    double d_tmp = strtod(argv[3], &nothing);
+    double iter_tmp = strtod(argv[argc-1],&nothing);
+    /*if passed all tests*/
+    int K;
+    int n;
+    int d;
+    int iter;
+    double *points;
+    iter = (int)iter_tmp;
+    d = (int)d_tmp;
+    n = (int)n_tmp;
+    K = (int)K_tmp;
+    points = (double *)malloc(n*d*sizeof(double));
     if(argc==5){
-        iter_tmp = strtod(argv[4],&nothing);
         if(!(iter_tmp>1)||!(iter_tmp<1000)||!(iter_tmp == (double)(int)iter_tmp)){
             printf("Invalid maximum iteration!");
             return 0;
         }
     }
-    else{iter_tmp = 200;}
+    else{iter = 200;}
     if(!(n_tmp>1)||!(n_tmp == (double)(int)n_tmp)){
         printf("Invalid number of points!");
         return 0;
@@ -128,20 +139,13 @@ int main(int argc, char **argv){
         return 0;
     }
     else{}
-    /*passed all tests*/
-    int K = (int)K_tmp;
-    int n = (int)n_tmp;
-    int d = (int)d_tmp;
-    int iter = (int)iter_tmp;
     /*inputting the points*/
-    char trash;
-    double points[n][d];
     for(i = 0 ; i < n ; i++){
         for (j = 0; j < d-1; ++j) {                
-            scanf("%lf", &points[i][j]);
+            scanf("%lf", &points[i*d+j]);
             scanf("%c", &trash);
         }
-        scanf("%lf\n", &points[i][d-1]);
+        scanf("%lf\n", &points[i*d+d-1]);
     }
     kmeans((double *)points, d, K, n, iter);
     return 0;
