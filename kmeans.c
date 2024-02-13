@@ -39,31 +39,31 @@ void assign(double *mu, double *DB, int *association, int d, int K, int n){
 // 1 - keep going
 // 0 - stop:*/
 int updateMu(double *mu, double *DB, int *association, int d, int K, int n){
-    int clusterSize[K];/*stores sizes of clusters.*/
-    double muTmp[K][d];/*stores the acccumelated positions.*/
+    int *clusterSize = (int *)malloc(K*sizeof(int));/*stores sizes of clusters.*/
+    double *muTmp = (double *)malloc(K*d*sizeof(double));/*stores the acccumelated positions.*/
     int i,j;
     for(i = 0 ; i < K*d ; i++) *((double *)muTmp+i) = 0;/* initiate muTmp to zeros.*/
     for(i = 0 ; i < K ; i++) clusterSize[i]=0;
     for(i = 0 ; i < n; ++i){
         clusterSize[association[i]]++;
-        for(j = 0;j<d;j++) muTmp[association[i]][j] += DB[i*d+j];
+        for(j = 0;j<d;j++) muTmp[association[i]*d+j] += DB[i*d+j];
     }
     for(i = 0 ; i < K ; i++){
         for(j = 0 ; j < d ; j++){
-            muTmp[i][j] /= clusterSize[i];
+            muTmp[i*d+j] /= clusterSize[i];
         }
     }
 
     int result = 0;
     for(i = 0 ; i < K ; i++){
         /*If even 1 of the centroids is far we keep going.*/
-        if(dist(mu+(i*d),muTmp[i],d)>=0.001){
+        if(dist(mu+(i*d),(muTmp+i*d),d)>=0.001){
             result = 1;
         }
     }
     for(i = 0 ; i < K ; i++){
         for(j = 0 ; j < d ; j++){
-            *(mu+(i*d+j)) = muTmp[i][j];
+            *(mu+(i*d+j)) = muTmp[i*d+j];
         }
     }
     
@@ -73,11 +73,11 @@ int updateMu(double *mu, double *DB, int *association, int d, int K, int n){
 /*kmeans*/
 void kmeans(double *DB, int d, int K, int n, int iter){ 
     /*initiate mu:*/
-    double mu[K][d];
+    double *mu = (double *)malloc(K*d*sizeof(double));
     int i,j;
     for(i = 0; i < K; ++i){
         for(j = 0; j < d; ++j){
-            mu[i][j] = DB[i*d+j];
+            mu[i*d+j] = DB[i*d+j];
         }
     }
     
@@ -92,9 +92,9 @@ void kmeans(double *DB, int d, int K, int n, int iter){
 
     for(i = 0 ; i < K ; i++){
         for(j = 0 ; j < d-1 ; j++){
-            printf("%.4f,", mu[i][j]);
+            printf("%.4f,", mu[i*d+j]);
         }
-        printf("%.4f\n", mu[i][d-1]);
+        printf("%.4f\n", mu[i*d+d-1]);
     }
 
 }
