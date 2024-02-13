@@ -107,7 +107,6 @@ int main(int argc, char **argv){
     K_tmp = strtod(argv[1], &nothing);
     n_tmp = strtod(argv[2], &nothing);
     d_tmp = strtod(argv[3], &nothing);
-    char* tmp_str;
     if(argc==5){
         iter_tmp = strtod(argv[4],&nothing);
         if(!(iter_tmp>1)||!(iter_tmp<1000)||!(iter_tmp == (double)(int)iter_tmp)){
