@@ -93,7 +93,7 @@ def main():
             file_name = sys.argv[5]
             assert((n>1)and(n == int(n))), "invalid number of points!"
             assert((n>K>1)and(K==int(K))), "invalid number of clusters!"
-            assert(d==int(d)), "Invalid dimension of point!"
+            assert((d==int(d))and(d>0)), "Invalid dimension of point!"
             assert((1000>iter>1)and(iter==int(iter))), "Invalid maximum iteration!"
             assert((file_name[len(file_name)-1]=="t")
                    and(file_name[len(file_name)-2]=="x")
@@ -113,7 +113,7 @@ def main():
             file_name = sys.argv[4]
             assert((n>1)and(n == int(n))), "invalid number of points!"
             assert((n>K>1)and(K==int(K))), "invalid number of clusters!"
-            assert(d==int(d)), "Invalid dimension of point!"
+            assert((d==int(d))and(d>0)), "Invalid dimension of point!"
             assert((file_name[len(file_name)-1]=="t")
                    and(file_name[len(file_name)-2]=="x")
                    and(file_name[len(file_name)-3]=="t")

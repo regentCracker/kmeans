@@ -136,7 +136,7 @@ int main(int argc, char **argv){
         printf("Invalid number of clusters!\n");
         return 1;
     }
-    if(!(d_tmp == (double)(int)d_tmp)){
+    if(!(d_tmp == (double)(int)d_tmp)&&(d_tmp>0){
         printf("Invalid dimension of point!\n");
         return 1;
     }
