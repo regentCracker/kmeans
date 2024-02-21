@@ -29,31 +29,56 @@ def dist(p, q):
     return sum**0.5
 def argmin(l):
     return [i for i in range(len(l)) if l[i]==min(l)]
-def delta(mu, epsilon):
+def delta(mu, prevmu, epsilon):#true = need to keep going. false = stop.
     for i in range(len(mu)):
-        if(dist(mu[i],mu[i-1])>=epsilon):
-            return False
-    return True
+        if(dist(mu[i],prevmu[i])>=epsilon):
+            return True
+    return False
 def k_means(K, iter=200, input_data=""):
     N = len(input_data)
     x = input_data #rename
     mu = [x[k] for k in range(K)]
+    prevmu = [mu[k] for k in range(K)]
     epsilon = 0.001
     iteration_number = 0
     assignment = []
-    while(delta(mu, epsilon) or iteration_number<iter):
-        assignment = [] #assign to every x the closest cluster
-        for x_i in x:
-            assignment.append(argmin([dist(x_i,mu[k]) for k in range(K)])[0])#the index of the closest cluster
-        for k in range(K):
-            mu[k] = vecadd(mu[k],mu[k],-1)
-            num = 0#cluster size
-            for i in range(N):
-                if(assignment[i] == k):#x_i belongs to cluster k
-                    num = num +1
-                    mu[k] = vecadd(mu[k], input_data[i])
-            mu[k] = vecadd(vecadd(mu[k],mu[k],-1),mu[k],1/num)
-        iteration_number = iteration_number + 1
+    while(iteration_number==0 or (delta(mu, prevmu, epsilon) and iteration_number<iter)):#keep going until the change is < eps. or iter. is reached
+        
+        if(iteration_number==0):
+            assignment = [] #assign to every x the closest cluster
+            for x_i in x:
+                assignment.append(argmin([dist(x_i,mu[k]) for k in range(K)])[0])#the index of the closest cluster
+            for k in range(K):
+                mu[k] = vecadd(mu[k],mu[k],-1)
+                num = 0#cluster size
+                for i in range(N):
+                    if(assignment[i] == k):#x_i belongs to cluster k
+                        num = num +1
+                        mu[k] = vecadd(mu[k], input_data[i])
+                mu[k] = vecadd(vecadd(mu[k],mu[k],-1),mu[k],1/num)
+            iteration_number += 1
+
+
+
+        
+        else:
+            prevmu = [mu[k] for k in range(K)]
+            assignment = [] #assign to every x the closest cluster
+            for x_i in x:
+                assignment.append(argmin([dist(x_i,mu[k]) for k in range(K)])[0])#the index of the closest cluster
+            for k in range(K):
+                mu[k] = vecadd(mu[k],mu[k],-1)
+                num = 0#cluster size
+                for i in range(N):
+                    if(assignment[i] == k):#x_i belongs to cluster k
+                        num = num +1
+                        mu[k] = vecadd(mu[k], input_data[i])
+                mu[k] = vecadd(vecadd(mu[k],mu[k],-1),mu[k],1/num)
+            iteration_number += 1
+
+        print(delta(mu, prevmu, epsilon))
+
+
     for i in range(len(mu)):
         mu[i] = ['{:.4f}'.format(mu[i][j]) for j in range(len(mu[i]))]
     return mu
