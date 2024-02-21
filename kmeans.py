@@ -76,7 +76,7 @@ def k_means(K, iter=200, input_data=""):
                 mu[k] = vecadd(vecadd(mu[k],mu[k],-1),mu[k],1/num)
             iteration_number += 1
 
-        print(delta(mu, prevmu, epsilon))
+        #print(delta(mu, prevmu, epsilon))
 
 
     for i in range(len(mu)):
