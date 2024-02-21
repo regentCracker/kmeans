@@ -66,7 +66,8 @@ int updateMu(double *mu, double *DB, int *association, int d, int K, int n){
             *(mu+(i*d+j)) = muTmp[i*d+j];
         }
     }
-    
+    free(clusterSize);
+    free(muTmp);
     return result;
 }
 
@@ -96,7 +97,8 @@ void kmeans(double *DB, int d, int K, int n, int iter){
         }
         printf("%.4f\n", mu[i*d+d-1]);
     }
-
+    free(mu);
+    free(association);
 }
 
 int main(int argc, char **argv){
@@ -121,22 +123,22 @@ int main(int argc, char **argv){
     points = (double *)malloc(n*d*sizeof(double));
     if(argc==5){
         if(!(iter_tmp>1)||!(iter_tmp<1000)||!(iter_tmp == (double)(int)iter_tmp)){
-            printf("Invalid maximum iteration!");
-            return 0;
+            printf("Invalid maximum iteration!\n");
+            return 1;
         }
     }
     else{iter = 200;}
     if(!(n_tmp>1)||!(n_tmp == (double)(int)n_tmp)){
-        printf("Invalid number of points!");
-        return 0;
+        printf("Invalid number of points!\n");
+        return 1;
     }
     if(!(K_tmp>1)||!(K_tmp<n_tmp)||!(K_tmp == (double)(int)K_tmp)){
-        printf("Invalid number of clusters!");
-        return 0;
+        printf("Invalid number of clusters!\n");
+        return 1;
     }
     if(!(d_tmp == (double)(int)d_tmp)){
-        printf("Invalid dimension of point!");
-        return 0;
+        printf("Invalid dimension of point!\n");
+        return 1;
     }
     else{}
     /*inputting the points*/
